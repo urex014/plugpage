@@ -27,7 +27,7 @@
       content="WhatsApp store Nigeria,online shop Lagos,small business website Nigeria,Google Business Profile Nigeria,sell on WhatsApp,PlugPage"
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="index.html" />
+    <link rel="canonical" href="https://plugpage.pages.dev/" />
     <meta
       property="og:title"
       content="PlugPage: Your WhatsApp shop, found and trusted."
@@ -54,7 +54,9 @@
       content="PlugPage turns your WhatsApp business into a Google-findable, trusted online shop in 24 hours. No app to learn, no website to manage. Built for Nigerian sellers."
     />
     <meta name="twitter:image" content="https://plugpage.pages.dev/og.png" />
-    <link rel="icon" href="./icon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="icon" href="./favicon.ico" sizes="48x48" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   </head>
   <body>
     <script type="application/ld+json">
@@ -507,6 +509,110 @@
           </p>
         </div>
       </section>
+      <section class="section" style="padding-top: 0" id="get-started">
+        <div class="wrap">
+          <div class="lead-wrap">
+            <div class="center">
+              <span class="eyebrow">Get started</span>
+              <h2>Tell us about your shop</h2>
+              <p class="lead">
+                Leave your details and we&#x27;ll message you on WhatsApp to
+                plan your page. Prefer to chat now? Use any WhatsApp button on
+                this page.
+              </p>
+            </div>
+            <form
+              class="panel"
+              id="lead-form"
+              aria-label="Tell us about your shop"
+              novalidate
+            >
+              <div class="row2">
+                <div class="field">
+                  <label for="lead-name">Your name *</label
+                  ><input
+                    id="lead-name"
+                    name="name"
+                    autocomplete="name"
+                    maxlength="80"
+                    required
+                    placeholder="e.g. Tolu Adeyemi"
+                  />
+                </div>
+                <div class="field">
+                  <label for="lead-whatsapp">WhatsApp number *</label
+                  ><input
+                    id="lead-whatsapp"
+                    name="whatsapp"
+                    type="tel"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    maxlength="20"
+                    required
+                    placeholder="0803 123 4567"
+                  />
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="lead-shop">Shop name or Instagram handle *</label
+                  ><input
+                    id="lead-shop"
+                    name="shop"
+                    maxlength="80"
+                    required
+                    placeholder="e.g. @toluschops"
+                  />
+                </div>
+                <div class="field">
+                  <label for="lead-category">What do you sell? *</label
+                  ><select id="lead-category" name="category" required>
+                    <option value="">Choose one</option>
+                    <option>Hair &amp; wigs</option>
+                    <option>Fragrance &amp; perfume</option>
+                    <option>Fashion &amp; clothing</option>
+                    <option>Food, cakes &amp; small chops</option>
+                    <option>Beauty &amp; skincare</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="lead-message">Anything else? (optional)</label
+                ><textarea
+                  id="lead-message"
+                  name="message"
+                  maxlength="500"
+                  placeholder="e.g. Your area, how many products you have, questions"
+                ></textarea>
+              </div>
+              <div class="lead-hp" aria-hidden="true">
+                <label for="lead-website">Leave this empty</label
+                ><input
+                  id="lead-website"
+                  name="website"
+                  tabindex="-1"
+                  autocomplete="off"
+                />
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">
+                Send my details
+              </button>
+              <p class="note" style="margin-bottom: 0">
+                We only use your details to reply to you about PlugPage.
+              </p>
+              <div
+                id="lead-status"
+                class="lead-status"
+                role="status"
+                aria-live="polite"
+                tabindex="-1"
+                hidden
+              ></div>
+            </form>
+          </div>
+        </div>
+      </section>
       <section class="section" style="padding-top: 0" id="refer">
         <div class="wrap">
           <div class="refer">
@@ -812,5 +918,6 @@
         Get my PlugPage on WhatsApp</a
       >
     </div>
+    <script src="js/lead-form.js" defer></script>
   </body>
 </html>
