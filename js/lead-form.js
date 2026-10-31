@@ -39,6 +39,8 @@
       "Shop/handle: " + data.shop,
       "What I sell: " + data.category,
     ];
+    if (data.orders_per_week) lines.push("Orders per week: " + data.orders_per_week);
+    if (data.runs_ads) lines.push("Runs ads: " + data.runs_ads);
     if (data.message) lines.push("Message: " + data.message);
     return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(lines.join("\n"));
   }
@@ -66,6 +68,8 @@
       whatsapp: val("whatsapp"),
       shop: val("shop"),
       category: val("category"),
+      orders_per_week: val("orders_per_week"),
+      runs_ads: val("runs_ads"),
       message: val("message"),
       page: location.pathname + location.search,
       website: val("website"), // honeypot: real people never see or fill this
