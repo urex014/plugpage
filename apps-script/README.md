@@ -3,7 +3,7 @@
 The homepage form (`#get-started`, code in `js/lead-form.js`) posts to a Google
 Apps Script web app, which appends one row per lead to a Google Sheet:
 
-| timestamp | name | whatsapp | shop/handle | category | message | source page |
+| timestamp | name | whatsapp | shop/handle | category | message | source page | orders per week | runs ads |
 
 Until the URL is set, the form sends nothing and instead offers a pre-filled
 WhatsApp message to +234 901 444 2677, so no lead is lost.
@@ -30,8 +30,7 @@ WhatsApp message to +234 901 444 2677, so no lead is lost.
 8. **Try it live.** Submit the form on https://plugpage.pages.dev/#get-started and confirm a row appears.
 
 ## Notes
-- If you later edit the script, use *Deploy > Manage deployments > Edit (pencil) > Version: New version*
-  so the same `/exec` URL keeps working. A *New deployment* creates a new URL.
+- After pasting an updated script, the web app must be redeployed (*Deploy > Manage deployments > edit > New version*) so the same `/exec` URL keeps working. A *New deployment* creates a new URL. This update adds optional `orders per week` and `runs ads` columns; an existing Leads tab that still has only the original header gets those headers added at the end.
 - Spam: a hidden honeypot field (`website`) is checked in the browser and in the script;
   filled-in submissions are silently dropped. Values are length-capped, and cells that start
   with `=`, `+`, `-` or `@` are prefixed with `'` so they can't run as formulas
