@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  var LEAD_ENDPOINT = ""; // TODO: set to the Apps Script /exec URL
+  var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbyIo-TdZB63r52YMnnXb0SWYR-_nIOo1gh9wUZoyY0243mXUJgAH1oiiC4ebvOl4v1OBw/exec"; // TODO: set to the Apps Script /exec URL
   var WHATSAPP_NUMBER = "2349014442677";
 
   var form = document.getElementById("lead-form");
