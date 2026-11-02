@@ -3,7 +3,7 @@
 The homepage form (`#get-started`, code in `js/lead-form.js`) posts to a Google
 Apps Script web app, which appends one row per lead to a Google Sheet:
 
-| timestamp | name | whatsapp | shop/handle | category | message | source page | orders per week | runs ads |
+| timestamp | name | whatsapp | shop/handle | category | message | source page | orders per week | runs ads | source | score |
 
 Until the URL is set, the form sends nothing and instead offers a pre-filled
 WhatsApp message to +234 901 444 2677, so no lead is lost.
@@ -30,7 +30,7 @@ WhatsApp message to +234 901 444 2677, so no lead is lost.
 8. **Try it live.** Submit the form on https://plugpage.pages.dev/#get-started and confirm a row appears.
 
 ## Notes
-- After pasting an updated script, the web app must be redeployed (*Deploy > Manage deployments > edit > New version*) so the same `/exec` URL keeps working. A *New deployment* creates a new URL. This update adds optional `orders per week` and `runs ads` columns; an existing Leads tab that still has only the original header gets those headers added at the end.
+- After pasting an updated script, the web app must be redeployed (*Deploy > Manage deployments > edit > New version*) so the same `/exec` URL keeps working. A *New deployment* creates a new URL. This update adds optional `source` and `score` columns (after the earlier `orders per week` and `runs ads` columns). An existing Leads tab whose header row is still a prefix of the full list gets the missing headers added at the end. `source` is a short label for which form sent the lead (`shop-ready-checklist` from the shop-ready tool; blank from the homepage). `score` is that tool's result, such as `7/10`, and is blank for other forms. The homepage still requires a shop name. The shop-ready checklist does not ask for one, so shop/handle may be blank when `source` is `shop-ready-checklist`.
 - Spam: a hidden honeypot field (`website`) is checked in the browser and in the script;
   filled-in submissions are silently dropped. Values are length-capped, and cells that start
   with `=`, `+`, `-` or `@` are prefixed with `'` so they can't run as formulas

@@ -36,11 +36,12 @@
       "Hi PlugPage! I'd like a PlugPage for my business.",
       "Name: " + data.name,
       "WhatsApp: " + data.whatsapp,
-      "Shop/handle: " + data.shop,
-      "What I sell: " + data.category,
     ];
+    if (data.shop) lines.push("Shop/handle: " + data.shop);
+    lines.push("What I sell: " + data.category);
     if (data.orders_per_week) lines.push("Orders per week: " + data.orders_per_week);
     if (data.runs_ads) lines.push("Runs ads: " + data.runs_ads);
+    if (data.score) lines.push("Checklist score: " + data.score);
     if (data.message) lines.push("Message: " + data.message);
     return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(lines.join("\n"));
   }
@@ -72,6 +73,9 @@
       runs_ads: val("runs_ads"),
       message: val("message"),
       page: location.pathname + location.search,
+      // Optional. Homepage leaves these blank. The shop-ready checklist sets them.
+      source: val("source"),
+      score: val("score"),
       website: val("website"), // honeypot: real people never see or fill this
     };
 
@@ -83,8 +87,16 @@
     }
 
     var digits = normalisePhone(data.whatsapp);
-    if (!data.name || !data.shop || !data.category) {
-      show("err", "Please fill in your name, shop or handle, and what you sell.");
+    // Shop is required only when the form actually asks for it. The shop-ready
+    // checklist uses the same form script with a shorter field list.
+    var asksForShop = !!form.elements["shop"];
+    if (!data.name || !data.category || (asksForShop && !data.shop)) {
+      show(
+        "err",
+        asksForShop
+          ? "Please fill in your name, shop or handle, and what you sell."
+          : "Please fill in your name and what you sell."
+      );
       return;
     }
     if (digits.length < 12 || digits.length > 15) {
