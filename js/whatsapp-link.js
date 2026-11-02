@@ -101,6 +101,69 @@
     return buildAutoMessage();
   }
 
+  function isInAppBrowser() {
+    return /Instagram|FBAN|FBAV|TikTok|musical_ly|Line\/|WhatsApp|iPhone|iPad/i.test(
+      navigator.userAgent || "",
+    );
+  }
+
+  function showHoldSavePanel(button, src) {
+    const row = button.closest(".btn-row") || button.parentElement;
+    let panel = row.nextElementSibling;
+    if (!panel || !panel.classList.contains("hold-save")) {
+      panel = document.createElement("div");
+      panel.className = "hold-save";
+      panel.innerHTML =
+        "<p>Press and hold the image, then tap Save image (or Add to Photos).</p>" +
+        '<button type="button" class="btn btn-ghost btn-sm">Close</button>' +
+        '<img alt="WhatsApp QR code" />';
+      row.insertAdjacentElement("afterend", panel);
+      panel.querySelector("button").addEventListener("click", function () {
+        const img = panel.querySelector("img");
+        if (img.src.indexOf("blob:") === 0) URL.revokeObjectURL(img.src);
+        panel.remove();
+      });
+    }
+    const img = panel.querySelector("img");
+    if (img.getAttribute("src") && img.src.indexOf("blob:") === 0 && img.src !== src) {
+      URL.revokeObjectURL(img.src);
+    }
+    img.src = src;
+    panel.hidden = false;
+  }
+
+  function downloadCanvas(canvasEl, filename, button) {
+    const inApp = isInAppBrowser();
+
+    function deliver(href, objectUrl) {
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      if (inApp) {
+        showHoldSavePanel(button, href);
+      } else if (objectUrl) {
+        setTimeout(function () {
+          URL.revokeObjectURL(href);
+        }, 2000);
+      }
+    }
+
+    if (typeof canvasEl.toBlob === "function") {
+      canvasEl.toBlob(function (blob) {
+        if (!blob) {
+          deliver(canvasEl.toDataURL("image/png"), false);
+          return;
+        }
+        deliver(URL.createObjectURL(blob), true);
+      }, "image/png");
+    } else {
+      deliver(canvasEl.toDataURL("image/png"), false);
+    }
+  }
+
   function updateOutputUI(url) {
     let resultContainer = panelRight.querySelector(".out-result-area");
     let emptyPrompt = panelRight.querySelector(".empty-prompt");
@@ -162,10 +225,7 @@
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "") || "product";
-        const a = document.createElement("a");
-        a.download = `whatsapp-order-qr-${slug}.png`;
-        a.href = canvas.toDataURL("image/png");
-        a.click();
+        downloadCanvas(canvas, `whatsapp-order-qr-${slug}.png`, btnDownload);
       });
     }
 
