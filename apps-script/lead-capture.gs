@@ -5,7 +5,7 @@
  * receive leads, then Deploy > New deployment > Web app
  * (Execute as: Me, Who has access: Anyone). See README.md in this folder.
  *
- * Columns: timestamp | name | whatsapp | shop/handle | category | message | source page | orders per week | runs ads
+ * Columns: timestamp | name | whatsapp | shop/handle | category | message | source page | orders per week | runs ads | source | score
  */
 
 var SHEET_NAME = "Leads";
@@ -19,9 +19,9 @@ var HEADERS = [
   "source page",
   "orders per week",
   "runs ads",
+  "source",
+  "score",
 ];
-// Header length before the optional qualifying questions were added.
-var OLD_HEADER_LEN = 7;
 var MAX_LEN = {
   name: 80,
   whatsapp: 20,
@@ -31,6 +31,8 @@ var MAX_LEN = {
   page: 200,
   orders_per_week: 40,
   runs_ads: 20,
+  source: 40,
+  score: 20,
 };
 
 function doPost(e) {
@@ -50,8 +52,15 @@ function doPost(e) {
       page: clean_(p.page, MAX_LEN.page),
       orders_per_week: clean_(p.orders_per_week, MAX_LEN.orders_per_week),
       runs_ads: clean_(p.runs_ads, MAX_LEN.runs_ads),
+      source: clean_(p.source, MAX_LEN.source),
+      score: clean_(p.score, MAX_LEN.score),
     };
-    if (!row.name || !row.whatsapp || !row.shop || !row.category) {
+    // Shop name is required for the homepage form. The shop-ready checklist
+    // does not ask for one, and sends source "shop-ready-checklist" instead.
+    if (!row.name || !row.whatsapp || !row.category) {
+      return json_({ ok: false, error: "missing_fields" });
+    }
+    if (!row.shop && row.source !== "shop-ready-checklist") {
       return json_({ ok: false, error: "missing_fields" });
     }
 
@@ -69,6 +78,8 @@ function doPost(e) {
         row.page,
         row.orders_per_week,
         row.runs_ads,
+        row.source,
+        row.score,
       ]);
     } finally {
       lock.releaseLock();
@@ -99,31 +110,33 @@ function readParams_(e) {
 function getSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  ensureHeaders_(sheet);
+  return sheet;
+}
+
+// Add any missing columns when row 1 is still a prefix of HEADERS
+// (original 7 columns, or the later 9). Leave a custom header row alone.
+function ensureHeaders_(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
     sheet.setFrozenRows(1);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
-  } else if (hasOldHeaderOnly_(sheet)) {
-    var extra = HEADERS.slice(OLD_HEADER_LEN);
-    sheet.getRange(1, OLD_HEADER_LEN + 1, 1, extra.length).setValues([extra]).setFontWeight("bold");
+    return;
   }
-  return sheet;
-}
-
-// A Leads tab created before the qualifying questions has only the original header.
-function hasOldHeaderOnly_(sheet) {
   var lastCol = sheet.getLastColumn();
-  if (lastCol < OLD_HEADER_LEN) return false;
+  if (lastCol < 1) return;
   var cells = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
-  var old = HEADERS.slice(0, OLD_HEADER_LEN);
+  var end = cells.length;
+  while (end > 0 && String(cells[end - 1] == null ? "" : cells[end - 1]).trim() === "") {
+    end--;
+  }
+  if (end >= HEADERS.length) return;
   var i;
-  for (i = 0; i < old.length; i++) {
-    if (String(cells[i]) !== old[i]) return false;
+  for (i = 0; i < end; i++) {
+    if (String(cells[i]) !== HEADERS[i]) return;
   }
-  for (i = old.length; i < cells.length; i++) {
-    if (String(cells[i] == null ? "" : cells[i]).trim() !== "") return false;
-  }
-  return true;
+  var extra = HEADERS.slice(end);
+  sheet.getRange(1, end + 1, 1, extra.length).setValues([extra]).setFontWeight("bold");
 }
 
 // Trim, cap length, and stop spreadsheet formula injection (=, +, -, @).
@@ -148,6 +161,8 @@ function setupAndTest() {
     "Other",
     "setup test",
     "/",
+    "",
+    "",
     "",
     "",
   ]);
