@@ -69,6 +69,7 @@
   let currentFormat = "status"; // "status" or "square"
   let showCredit = true;
 
+  const form = document.querySelector(".tool form");
   const canvas =
     document.querySelector('canvas[data-testid="pl-canvas"]') ||
     document.querySelector(".canvas-wrap canvas");
@@ -77,15 +78,25 @@
   const titleInput = document.getElementById("pl-title");
   const phoneInput = document.getElementById("pl-phone");
   const footInput = document.getElementById("pl-foot");
-  const itemsContainer = document.querySelector(".items-list");
-  const countLabel = document.querySelector("label small");
+  const itemsContainer = form
+    ? form.querySelector(".items-list")
+    : document.querySelector(".items-list");
+  const countLabel = form
+    ? form.querySelector("label small")
+    : document.querySelector(".tool label small");
   const btnRow = itemsContainer ? itemsContainer.nextElementSibling : null;
   const btnAdd = btnRow ? btnRow.querySelector("button:first-child") : null;
   const btnClear = btnRow ? btnRow.querySelector("button:last-child") : null;
-  const swatches = document.querySelectorAll(".swatches button");
-  const segButtons = document.querySelectorAll(".seg button");
-  const creditCheckbox = document.querySelector('input[type="checkbox"]');
-  const btnDownload = document.querySelector(".btn-primary");
+  const swatches = form
+    ? form.querySelectorAll(".swatches button")
+    : document.querySelectorAll(".tool .swatches button");
+  const segButtons = form
+    ? form.querySelectorAll(".seg button")
+    : document.querySelectorAll(".tool .seg button");
+  const creditCheckbox = form
+    ? form.querySelector('input[type="checkbox"]')
+    : document.querySelector('.tool input[type="checkbox"]');
+  const btnDownload = document.getElementById("pl-download");
 
   if (!canvas) return;
 
@@ -135,6 +146,8 @@
 
       const [nameInp, priceInp] = row.querySelectorAll("input");
       const delBtn = row.querySelector("button");
+      bindSelectOnFocus(nameInp);
+      bindSelectOnFocus(priceInp);
 
       nameInp.addEventListener("input", (e) => {
         items[index].name = e.target.value;
@@ -229,18 +242,27 @@
     ctx.fillText(headingText, 100, topY + (isSquare ? 39 : 47));
     topY += isSquare ? 84 : 104;
 
-    // Card background
+    // Card background. Status cards used to stretch to the bottom of the
+    // 1920px canvas, so a short list sat in a mostly empty white block.
     const validItems = items.filter((it) => it.name.trim() || it.price.trim());
-    const cardH = h - topY - ((isSquare ? 120 : 260) + (showCredit ? 30 : 0));
+    let cardH;
+    let rowH;
+    if (isSquare) {
+      cardH = h - topY - (120 + (showCredit ? 30 : 0));
+      rowH = Math.min(74, (cardH - 40) / Math.max(validItems.length, 1));
+    } else {
+      const naturalRowH = 110;
+      const rows = Math.max(validItems.length, 1);
+      const contentH = rows * naturalRowH + 40;
+      const maxH = h - topY - (260 + (showCredit ? 30 : 0));
+      cardH = Math.min(Math.max(contentH, 700), Math.max(maxH, 40));
+      rowH = Math.min(naturalRowH, (cardH - 40) / rows);
+    }
     ctx.fillStyle = theme.card;
     roundRect(ctx, 56, topY, 968, cardH, 36);
     ctx.fill();
 
     // Items inside card
-    const rowH = Math.min(
-      isSquare ? 74 : 110,
-      (cardH - 40) / Math.max(validItems.length, 1),
-    );
     const fontSize = Math.max(24, Math.min(isSquare ? 34 : 44, 0.42 * rowH));
     let itemY = topY + 20 + rowH / 2;
 
@@ -325,9 +347,87 @@
     }
   }
 
+  function bindSelectOnFocus(input) {
+    if (!input || input.dataset.selectOnFocus === "1") return;
+    const type = (input.type || "").toLowerCase();
+    if (type === "checkbox" || type === "radio" || type === "button") return;
+    input.dataset.selectOnFocus = "1";
+    input.addEventListener("focus", function () {
+      const el = this;
+      setTimeout(function () {
+        el.select();
+      }, 0);
+    });
+  }
+
+  function isInAppBrowser() {
+    return /Instagram|FBAN|FBAV|TikTok|musical_ly|Line\/|WhatsApp|iPhone|iPad/i.test(
+      navigator.userAgent || "",
+    );
+  }
+
+  function showHoldSavePanel(button, src) {
+    const row = button.closest(".btn-row") || button.parentElement;
+    let panel = row.nextElementSibling;
+    if (!panel || !panel.classList.contains("hold-save")) {
+      panel = document.createElement("div");
+      panel.className = "hold-save";
+      panel.innerHTML =
+        "<p>Press and hold the image, then tap Save image (or Add to Photos).</p>" +
+        '<button type="button" class="btn btn-ghost btn-sm">Close</button>' +
+        '<img alt="Price list image" />';
+      row.insertAdjacentElement("afterend", panel);
+      panel.querySelector("button").addEventListener("click", function () {
+        const img = panel.querySelector("img");
+        if (img.src.indexOf("blob:") === 0) URL.revokeObjectURL(img.src);
+        panel.remove();
+      });
+    }
+    const img = panel.querySelector("img");
+    if (img.getAttribute("src") && img.src.indexOf("blob:") === 0 && img.src !== src) {
+      URL.revokeObjectURL(img.src);
+    }
+    img.src = src;
+    panel.hidden = false;
+  }
+
+  function downloadCanvas(canvasEl, filename, button) {
+    const inApp = isInAppBrowser();
+
+    function deliver(href, objectUrl) {
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      if (inApp) {
+        showHoldSavePanel(button, href);
+      } else if (objectUrl) {
+        setTimeout(function () {
+          URL.revokeObjectURL(href);
+        }, 2000);
+      }
+    }
+
+    if (typeof canvasEl.toBlob === "function") {
+      canvasEl.toBlob(function (blob) {
+        if (!blob) {
+          deliver(canvasEl.toDataURL("image/png"), false);
+          return;
+        }
+        deliver(URL.createObjectURL(blob), true);
+      }, "image/png");
+    } else {
+      deliver(canvasEl.toDataURL("image/png"), false);
+    }
+  }
+
   // Event Listeners
   [bizInput, tagInput, titleInput, phoneInput, footInput].forEach((inp) => {
-    if (inp) inp.addEventListener("input", draw);
+    if (!inp) return;
+    inp.addEventListener("input", draw);
+    bindSelectOnFocus(inp);
   });
 
   if (btnAdd) {
@@ -402,10 +502,11 @@
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "") || "price-list";
-      const a = document.createElement("a");
-      a.download = `${slug}-price-list-${currentFormat}.png`;
-      a.href = canvas.toDataURL("image/png");
-      a.click();
+      downloadCanvas(
+        canvas,
+        `${slug}-price-list-${currentFormat}.png`,
+        btnDownload,
+      );
     });
   }
 

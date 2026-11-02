@@ -710,6 +710,9 @@ footer a {
   text-decoration: none;
   margin-right: 16px;
 }
+footer .wrap > div a:last-of-type {
+  margin-right: 0;
+}
 .mcta {
   position: fixed;
   left: 12px;
@@ -1170,6 +1173,38 @@ body {
   border-radius: 10px;
   box-shadow: var(--shadow);
 }
+.tool-sample-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  background: var(--amber-50);
+  border: 1px solid #f6dfa9;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #7a4e00;
+}
+.hold-save {
+  margin: 4px 0 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  max-width: 100%;
+  text-align: center;
+}
+.hold-save img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 10px;
+  border-radius: 12px;
+}
+.hold-save p {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
 .cta-band {
   background: var(--ink);
   color: #fff;
@@ -1368,6 +1403,28 @@ body {
   color: #b42318;
 }
 @media (max-width: 520px) {
+  .nav .wrap {
+    height: 52px;
+  }
+  .nav .brand {
+    font-size: 1rem;
+    gap: 6px;
+  }
+  .nav .brand img {
+    width: 24px;
+    height: 24px;
+  }
+  .nav .btn {
+    padding: 6px 10px;
+    min-height: 32px;
+    font-size: 0.78rem;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .nav .btn .wa-ico {
+    width: 16px;
+    height: 16px;
+  }
   .lead-wrap .row2 {
     grid-template-columns: 1fr;
   }
